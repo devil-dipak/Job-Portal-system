@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CertChain Admin</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#f1f5f9; font-family:'Segoe UI',system-ui,sans-serif; padding:40px; display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .card { background:#fff; border-radius:16px; padding:36px; border:1px solid #e2e8f0; max-width:640px; width:100%; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+  .upload-zone { border:2px dashed #cbd5e1; border-radius:12px; padding:40px 20px; text-align:center; cursor:pointer; transition:all 0.2s; background:#f8fafc; }
+  .upload-zone:hover { border-color:#4f46e5; background:#eef2ff; }
+  .upload-zone i { font-size:40px; color:#94a3b8; }
+  .success-msg { background:#dcfce7; color:#15803d; padding:12px 16px; border-radius:10px; font-size:14px; border:1px solid #bbf7d0; }
+  .error-msg { background:#fef2f2; color:#dc2626; padding:12px 16px; border-radius:10px; font-size:14px; border:1px solid #fecaca; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="width:56px;height:56px;border-radius:14px;background:#eef2ff;color:#4f46e5;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+    <h4 style="font-weight:700;color:#0f172a;">Bulk Certificate Issuance</h4>
+    <p style="color:#64748b;font-size:14px;margin:0;">Upload a CSV file to issue multiple certificates at once</p>
+  </div>
+
+  <div th:if="${success}" class="success-msg mb-3"><i class="bi bi-check-circle me-1"></i><span th:text="${success}">Success</span></div>
+  <div th:if="${error}" class="error-msg mb-3"><i class="bi bi-exclamation-circle me-1"></i><span th:text="${error}">Error</span></div>
+
+  <div style="background:#f8fafc;border-radius:10px;padding:16px;margin-bottom:20px;font-size:13px;color:#64748b;">
+    <strong style="color:#334155;">CSV Format:</strong><br>
+    <code style="font-size:12px;">StudentName,CourseName,Department,IssueDate,Issuer(optional)</code><br>
+    <code style="font-size:12px;">John Doe,Computer Science,Engineering,2024-01-15,Dr. Smith</code>
+  </div>
+
+  <form action="/certificate/bulk" method="POST" enctype="multipart/form-data">
+    <div class="upload-zone" onclick="document.getElementById('csvFile').click()">
+      <i class="bi bi-cloud-arrow-up"></i>
+      <p style="margin:10px 0 0;color:#64748b;font-size:14px;"><strong>Click to upload CSV</strong> or drag and drop</p>
+      <small style="color:#94a3b8;">.csv files only</small>
+      <input type="file" name="csvFile" id="csvFile" class="d-none" accept=".csv" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100 mt-3" style="border-radius:10px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;padding:12px;font-weight:600;">
+      <i class="bi bi-upload me-1"></i>Upload & Issue Certificates
+    </button>
+  </form>
+
+  <div class="mt-3 text-center"><a href="/home" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a></div>
+</div>
+</body>
+</html>

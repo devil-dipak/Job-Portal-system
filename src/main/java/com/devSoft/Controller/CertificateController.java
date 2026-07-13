@@ -61,13 +61,8 @@ public class CertificateController {
 
 	@GetMapping("/list")
 	public String getCertList(Model model, HttpSession session) {
-		if (!isLoggedIn(session)) return "LoginForm";
-		User user = (User) session.getAttribute("activeuser");
-		if (user.getRole().equalsIgnoreCase("student")) {
-			model.addAttribute("certList", certService.getCertsByStudent(user.getFname() + " " + user.getLname()));
-		} else {
-			model.addAttribute("certList", certService.getAllCerts());
-		}
+		if (!isAdmin(session)) return "LoginForm";
+		model.addAttribute("certList", certService.getAllCerts());
 		return "CertificateListForm";
 	}
 
@@ -75,7 +70,11 @@ public class CertificateController {
 	public String myCertificates(Model model, HttpSession session) {
 		User user = (User) session.getAttribute("activeuser");
 		if (user == null) return "LoginForm";
+		model.addAttribute("user", user);
 		model.addAttribute("certList", certService.getCertsByStudent(user.getFname() + " " + user.getLname()));
+		if ("student".equalsIgnoreCase(user.getRole())) {
+			return "StudentCertificateList";
+		}
 		return "CertificateListForm";
 	}
 
@@ -122,10 +121,15 @@ public class CertificateController {
 	@GetMapping(path = "/qr/{id}", produces = MediaType.IMAGE_PNG_VALUE)
 	public ResponseEntity<byte[]> getQr(@PathVariable Long id, HttpSession session) {
 		if (!isLoggedIn(session)) return ResponseEntity.status(401).build();
-		Certificate cert = certService.getCertById(id);
-		String data = "CERT-ID:" + cert.getId() + "|HASH:" + cert.getCertificateHash();
-		byte[] qr = QRCodeGenerator.generateQRCode(data);
-		return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(qr);
+		try {
+			Certificate cert = certService.getCertById(id);
+			if (cert == null) return ResponseEntity.notFound().build();
+			String data = "CERT-ID:" + cert.getId() + "|HASH:" + cert.getCertificateHash();
+			byte[] qr = QRCodeGenerator.generateQRCode(data);
+			return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(qr);
+		} catch (RuntimeException e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 }

@@ -1,46 +1,41 @@
 package com.devSoft.Utils;
 
-
 import java.util.List;
 import java.util.Map;
-
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.web.servlet.view.document.AbstractXlsxView;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.servlet.View;
 
 import com.devSoft.Model.Block;
-
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class BlockExcelView extends AbstractXlsxView {
+public class BlockExcelView implements View {
 
 	@Override
-	protected void buildExcelDocument(
-			Map<String, Object> model, 
-			Workbook workbook, 
-			HttpServletRequest request,
-			HttpServletResponse response) 
-					throws Exception {
+	public String getContentType() {
+		return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	}
 
-		//1. define your own excel file name
-		response.addHeader("Content-Disposition", "attachment;filename=block.xls");
-		
-		//2. read data given by Controller
+	@Override
+	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		response.addHeader("Content-Disposition", "attachment;filename=block.xlsx");
+		response.setContentType(getContentType());
+
 		@SuppressWarnings("unchecked")
 		List<Block> list = (List<Block>) model.get("bList");
-		
-		//3. create one sheet
-		Sheet sheet = workbook.createSheet("DEPARTMENT");
-		
-		//4. create row#0 as header
-		setHead(sheet);
-		
-		//5. create row#1 onwards from List<T> 
-		setBody(sheet,list);
+
+		try (Workbook workbook = new XSSFWorkbook()) {
+			Sheet sheet = workbook.createSheet("DEPARTMENT");
+			setHead(sheet);
+			setBody(sheet, list);
+			workbook.write(response.getOutputStream());
+		}
 	}
 
 	private void setHead(Sheet sheet) {
@@ -50,10 +45,10 @@ public class BlockExcelView extends AbstractXlsxView {
 		row.createCell(2).setCellValue("CURRENT HASH");
 		row.createCell(3).setCellValue("DATA");
 	}
-	
+
 	private void setBody(Sheet sheet, List<Block> list) {
 		int rowNum = 1;
-		for(Block spec : list) {
+		for (Block spec : list) {
 			Row row = sheet.createRow(rowNum++);
 			row.createCell(0).setCellValue(spec.getId());
 			row.createCell(1).setCellValue(spec.getPreviousHash());

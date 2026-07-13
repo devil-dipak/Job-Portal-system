@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up | CertChain</title>
+  <title>CertChain</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -179,6 +179,36 @@
 
     .auth-footer a:hover { text-decoration: underline; }
 
+    .password-hints {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 14px;
+    }
+    .password-hints .hint {
+      font-size: 11px;
+      color: #94a3b8;
+      transition: all 0.2s;
+    }
+    .password-hints .hint.valid { color: #15803d; }
+    .password-hints .hint.invalid { color: #dc2626; }
+    .field-error {
+      font-size: 11px;
+      color: #dc2626;
+      margin-top: 4px;
+      display: block;
+    }
+
+    .error-msg {
+      background: #fef2f2;
+      color: #dc2626;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      border: 1px solid #fecaca;
+    }
+
     @media (max-width: 700px) {
       .auth-container { flex-direction: column; max-width: 420px; }
       .auth-brand { padding: 28px 24px; min-height: 160px; }
@@ -191,7 +221,7 @@
 <body>
   <div class="auth-container">
     <div class="auth-brand">
-      <div class="brand-icon">&#x1F512;</div>
+      <div class="brand-icon"><img src="/logo.svg" style="width:40px;height:40px;"></div>
       <h1>CertChain</h1>
       <p>Blockchain-powered<br>certificate verification system</p>
     </div>
@@ -199,7 +229,9 @@
       <h2>Create account</h2>
       <p class="subtitle">Join the certificate verification network</p>
 
-      <form action="/signup" method="POST">
+      <p class="error-msg" th:if="${message}" th:text="${message}" style="display:none;" id="serverError"></p>
+
+      <form action="/signup" method="POST" id="signupForm">
         <div class="form-row">
           <div class="form-group">
             <label for="fname">First name</label>
@@ -225,11 +257,18 @@
         <div class="form-row">
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" placeholder="Min. 6 characters" minlength="6" required>
+            <input type="password" name="password" id="password" placeholder="Min. 6 characters" required>
+            <div class="password-hints" id="passwordHints">
+              <span id="req-length" class="hint">&#x2022; At least 6 characters</span>
+              <span id="req-upper" class="hint">&#x2022; 1 uppercase letter</span>
+              <span id="req-digit" class="hint">&#x2022; 1 digit</span>
+              <span id="req-symbol" class="hint">&#x2022; 1 symbol (!&#64;#$%^&amp;*etc.)</span>
+            </div>
           </div>
           <div class="form-group">
             <label for="re_pass">Confirm password</label>
             <input type="password" name="re_pass" id="re_pass" placeholder="Repeat password" required>
+            <span id="matchMsg" class="field-error"></span>
           </div>
         </div>
         <button type="submit" class="btn-submit">Create Account</button>
@@ -240,5 +279,47 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Show server error if present
+    var serr = document.getElementById('serverError');
+    if (serr && serr.textContent.trim()) { serr.style.display = 'block'; }
+
+    var pwd = document.getElementById('password');
+    var rePass = document.getElementById('re_pass');
+    var matchMsg = document.getElementById('matchMsg');
+
+    var hints = {
+      length: document.getElementById('req-length'),
+      upper: document.getElementById('req-upper'),
+      digit: document.getElementById('req-digit'),
+      symbol: document.getElementById('req-symbol')
+    };
+
+    function validatePassword() {
+      var val = pwd.value;
+      var tests = {
+        length: val.length >= 6,
+        upper: /[A-Z]/.test(val),
+        digit: /\d/.test(val),
+        symbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val)
+      };
+      for (var key in tests) {
+        var el = hints[key];
+        if (tests[key]) { el.classList.add('valid'); el.classList.remove('invalid'); }
+        else { el.classList.add('invalid'); el.classList.remove('valid'); }
+      }
+      checkMatch();
+    }
+
+    function checkMatch() {
+      if (rePass.value.length === 0) { matchMsg.textContent = ''; return; }
+      if (pwd.value === rePass.value) { matchMsg.textContent = '✓ Passwords match'; matchMsg.style.color = '#15803d'; }
+      else { matchMsg.textContent = '✗ Passwords do not match'; matchMsg.style.color = '#dc2626'; }
+    }
+
+    pwd.addEventListener('input', validatePassword);
+    rePass.addEventListener('input', checkMatch);
+  </script>
 </body>
 </html>

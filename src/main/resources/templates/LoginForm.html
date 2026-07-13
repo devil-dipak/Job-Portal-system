@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In | CertChain</title>
+  <title>CertChain</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -42,7 +42,7 @@
     }
 
     .auth-brand::before {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0%, transparent 60%);
@@ -174,6 +174,19 @@
 
     .auth-footer a:hover { text-decoration: underline; }
 
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 13px;
+      margin-top: -12px;
+      margin-bottom: 18px;
+    }
+    .forgot-link a {
+      color: #64748b;
+      text-decoration: none;
+    }
+    .forgot-link a:hover { color: #4f46e5; text-decoration: underline; }
+
     @media (max-width: 700px) {
       .auth-container { flex-direction: column; max-width: 420px; }
       .auth-brand { padding: 32px 24px; min-height: 180px; }
@@ -183,9 +196,14 @@
   </style>
 </head>
 <body>
+
+<div id="toast" th:if="${signupSuccess}" style="position:fixed;top:20px;right:20px;z-index:9999;background:#15803d;color:#fff;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,0.15);">
+  <span th:text="${signupSuccess}">Account created!</span>
+</div>
+
   <div class="auth-container">
     <div class="auth-brand">
-      <div class="brand-icon">&#x1F512;</div>
+      <div class="brand-icon"><img src="/logo.svg" style="width:40px;height:40px;"></div>
       <h1>CertChain</h1>
       <p>Blockchain-powered<br>certificate verification system</p>
     </div>
@@ -204,13 +222,25 @@
           <label for="password">Password</label>
           <input type="password" name="password" id="password" placeholder="Enter your password" required>
         </div>
+        <div class="forgot-link">
+          <a href="/forgot-password">Forgot password?</a>
+        </div>
         <button type="submit" class="btn-submit">Sign In</button>
       </form>
 
       <div class="auth-footer">
-        Don't have an account? <a href="/signup">Create one</a>
+        Don&apos;t have an account? <a href="/signup">Create one</a>
       </div>
     </div>
   </div>
+<script>
+  var t = document.getElementById("toast");
+  if (t) {
+    setTimeout(function() {
+      t.style.transition = "opacity 0.5s"; t.style.opacity = "0";
+      setTimeout(function(){t.remove()},500);
+    }, 3000);
+  }
+</script>
 </body>
 </html>

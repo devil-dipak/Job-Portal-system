@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+    .sidebar { position:fixed; left:0; top:0; bottom:0; width:250px; background:linear-gradient(180deg,#0f172a,#1e293b); padding:0; z-index:100; overflow-y:auto; }
+    .sidebar-brand { padding:20px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .sidebar-brand h3 { color:#fff; font-size:18px; font-weight:700; letter-spacing:-0.5px; margin:0; }
+    .sidebar-brand small { color:#94a3b8; font-size:11px; }
+    .sidebar-nav { padding:12px 0; }
+    .sidebar-nav a { display:flex; align-items:center; gap:12px; padding:11px 20px; color:#cbd5e1; text-decoration:none; font-size:14px; font-weight:500; transition:all 0.2s; border-left:3px solid transparent; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background:rgba(255,255,255,0.06); color:#fff; border-left-color:#4f46e5; }
+    .sidebar-nav a i { font-size:18px; width:22px; text-align:center; }
+    .sidebar-nav .section-label { padding:16px 20px 6px; font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; }
+    .main-content { margin-left:250px; min-height:100vh; }
+    .topbar { background:#fff; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:99; }
+    .content { padding:28px 32px; }
+    .card { border:none; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .profile-pic-lg { width:96px; height:96px; border-radius:50%; object-fit:cover; }
+    .profile-initial-lg { width:96px; height:96px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#eef2ff; color:#4f46e5; font-weight:700; font-size:32px; }
+    .info-label { font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; }
+    .info-value { font-size:14px; color:#0f172a; }
+    .skill-tag { display:inline-block; padding:3px 12px; border-radius:12px; font-size:12px; font-weight:500; background:#eef2ff; color:#4f46e5; margin:2px 3px; }
+    .doc-link { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:500; background:#f8fafc; border:1px solid #e2e8f0; color:#0f172a; text-decoration:none; }
+    .doc-link:hover { background:#eef2ff; border-color:#4f46e5; }
+    @media(max-width:768px) {
+      .sidebar { width:60px; }
+      .sidebar-brand h3, .sidebar-brand small, .sidebar-nav a span, .sidebar-nav .section-label { display:none; }
+      .sidebar-nav a { justify-content:center; padding:14px; border-left:none; }
+      .main-content { margin-left:60px; }
+      .content { padding:20px 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="d-flex align-items-center gap-2">
+      <img src="/logo.svg" style="width:28px;height:28px;">
+      <div>
+        <h3>CertChain</h3>
+        <small><span style="font-size:9px;background:#4f46e5;color:#fff;padding:1px 8px;border-radius:8px;">ADMIN</span></small>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="section-label">Main</div>
+    <a href="/home"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+    <a href="/admin/activities"><i class="bi bi-activity"></i><span>Activities</span></a>
+    <div class="section-label">Management</div>
+    <a href="/admin/students"><i class="bi bi-mortarboard"></i><span>Students</span></a>
+    <a href="/admin/companies"><i class="bi bi-building"></i><span>Companies</span></a>
+    <a href="/admin/jobs"><i class="bi bi-briefcase"></i><span>Jobs</span></a>
+    <a href="/admin/applications"><i class="bi bi-send"></i><span>Applications</span></a>
+    <div class="section-label">Account</div>
+    <a href="/profile"><i class="bi bi-person"></i><span>Profile</span></a>
+    <a href="/logout"><i class="bi bi-box-arrow-left"></i><span>Logout</span></a>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <h4 style="font-size:18px;font-weight:600;color:#0f172a;margin:0;"><a href="/admin/students" style="color:#64748b;text-decoration:none;">Students</a> <span style="color:#94a3b8;">/</span> <span th:text="${student.fname + ' ' + student.lname}">Student Name</span></h4>
+  </div>
+
+  <div class="content">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card p-4 text-center">
+          <img th:if="${profile != null and profile.profilePicture != null}" class="profile-pic-lg mx-auto mb-3" th:src="'/uploads/profile-pictures/' + ${profile.profilePicture}">
+          <div th:unless="${profile != null and profile.profilePicture != null}" class="profile-initial-lg mx-auto mb-3" th:text="${#strings.substring(student.fname,0,1)}">S</div>
+          <h5 style="font-weight:700;color:#0f172a;" th:text="${student.fname + ' ' + student.lname}">Student Name</h5>
+          <div style="font-size:13px;color:#64748b;" th:if="${profile != null and profile.studentId != null}" th:text="${profile.studentId}">Student ID</div>
+          <div style="font-size:13px;color:#64748b;" th:unless="${profile == null or profile.studentId == null}" th:text="${student.email}">email</div>
+          <div class="mt-2">
+            <span style="font-size:11px;padding:2px 10px;border-radius:20px;font-weight:600;background:#eef2ff;color:#4f46e5;">Student</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="card p-4">
+          <h6 style="font-weight:600;color:#0f172a;margin-bottom:16px;">Contact Information</h6>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="info-label">Email</div>
+              <div class="info-value" th:text="${student.email}">email</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="info-label">Phone</div>
+              <div class="info-value" th:if="${profile != null and profile.phone != null}" th:text="${profile.phone}">phone</div>
+              <div class="info-value" th:unless="${profile != null and profile.phone != null}" style="color:#94a3b8;">—</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="info-label">Address</div>
+              <div class="info-value" th:if="${profile != null and profile.address != null}" th:text="${profile.address}">address</div>
+              <div class="info-value" th:unless="${profile != null and profile.address != null}" style="color:#94a3b8;">—</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="info-label">Student ID</div>
+              <div class="info-value" th:if="${profile != null and profile.studentId != null}" th:text="${profile.studentId}">SID</div>
+              <div class="info-value" th:unless="${profile != null and profile.studentId != null}" style="color:#94a3b8;">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-4 mt-3">
+          <h6 style="font-weight:600;color:#0f172a;margin-bottom:16px;">Education</h6>
+          <div th:if="${profile != null and profile.education != null}" style="font-size:14px;color:#0f172a;white-space:pre-line;" th:text="${profile.education}">education</div>
+          <div th:unless="${profile != null and profile.education != null}" style="font-size:13px;color:#94a3b8;">No education details provided.</div>
+        </div>
+
+        <div class="card p-4 mt-3">
+          <h6 style="font-weight:600;color:#0f172a;margin-bottom:16px;">Skills</h6>
+          <div th:if="${profile != null and profile.skills != null}">
+            <span th:each="skill : ${#strings.listSplit(profile.skills, ',')}" class="skill-tag" th:text="${skill}">skill</span>
+          </div>
+          <div th:unless="${profile != null and profile.skills != null}" style="font-size:13px;color:#94a3b8;">No skills listed.</div>
+        </div>
+
+        <div class="card p-4 mt-3">
+          <h6 style="font-weight:600;color:#0f172a;margin-bottom:16px;">Documents</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <a th:if="${profile != null and profile.resumePath != null}" class="doc-link" th:href="'/uploads/resumes/' + ${profile.resumePath}" target="_blank"><i class="bi bi-file-text" style="color:#4f46e5;"></i>Resume</a>
+            <a th:if="${profile != null and profile.certificateFile != null}" class="doc-link" th:href="'/uploads/certificates/' + ${profile.certificateFile}" target="_blank"><i class="bi bi-patch-check" style="color:#4f46e5;"></i>Certificate File</a>
+            <a th:if="${profile != null and profile.extraDocFile != null}" class="doc-link" th:href="'/uploads/documents/' + ${profile.extraDocFile}" target="_blank"><i class="bi bi-paperclip" style="color:#4f46e5;"></i>Extra Document</a>
+          </div>
+          <div th:if="${(profile == null or profile.resumePath == null) and (profile == null or profile.certificateFile == null) and (profile == null or profile.extraDocFile == null)}" style="font-size:13px;color:#94a3b8;">No documents uploaded.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

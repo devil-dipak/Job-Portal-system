@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain HR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#f1f5f9; font-family:'Segoe UI',system-ui,sans-serif; padding:30px; }
+    .card { border:none; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .form-label { font-size:13px; font-weight:600; color:#334155; margin-bottom:4px; }
+    .form-control { border-radius:10px; border:1.5px solid #e2e8f0; font-size:14px; padding:10px 14px; }
+    .form-control:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,0.12); }
+    .btn-primary { background:linear-gradient(135deg,#7c3aed,#a78bfa); border:none; border-radius:10px; padding:10px 24px; font-weight:600; }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(124,58,237,0.35); }
+    .picker-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; max-height:400px; overflow-y:auto; }
+    .picker-item { border:2px solid #e2e8f0; border-radius:8px; overflow:hidden; cursor:pointer; text-align:center; padding:6px; transition:all .15s; }
+    .picker-item:hover { border-color:#7c3aed; background:#f5f3ff; }
+    .picker-item img { width:100%; height:70px; object-fit:cover; border-radius:4px; }
+    .picker-item .fi { font-size:28px; color:#94a3b8; padding:10px 0; }
+    .picker-item .pn { font-size:11px; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .picker-item.selected { border-color:#7c3aed; background:#f5f3ff; }
+    .logo-preview { width:80px; height:80px; border-radius:12px; object-fit:cover; border:2px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+<div class="container" style="max-width:600px;">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 style="font-weight:700;color:#0f172a;margin:0;"><i class="bi bi-pencil me-2" style="color:#7c3aed;"></i>Edit Profile</h4>
+    <a href="/hr/profile" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i>Back to Profile</a>
+  </div>
+
+  <div th:if="${message}" class="alert alert-success py-2 px-3" style="font-size:13px;border-radius:10px;" th:text="${message}"></div>
+
+  <div class="card">
+    <div class="card-header" style="background:#fff;border-bottom:1px solid #e2e8f0;padding:18px 24px;font-weight:600;font-size:16px;border-radius:14px 14px 0 0;">
+      <i class="bi bi-person me-2" style="color:#7c3aed;"></i>Profile Information
+    </div>
+    <div class="card-body p-4">
+      <form action="/hr/profile/edit" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">First Name</label>
+          <input type="text" name="fname" class="form-control" th:value="${user.fname}" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="lname" class="form-control" th:value="${user.lname}" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" th:value="${user.email}" required>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">New Password <span style="color:#94a3b8;font-weight:400;">(leave blank to keep current)</span></label>
+          <div style="position:relative;">
+            <input type="password" name="newPassword" id="newPassword" class="form-control" placeholder="Enter new password" style="padding-right:44px;">
+            <span onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#94a3b8;font-size:18px;user-select:none;" id="pwdIcon"><i class="bi bi-eye-slash"></i></span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header" style="background:#fff;border-bottom:1px solid #e2e8f0;padding:18px 24px;font-weight:600;font-size:16px;border-radius:14px 14px 0 0;">
+      <i class="bi bi-building me-2" style="color:#7c3aed;"></i>Company Logo
+    </div>
+    <div class="card-body p-4">
+      <form action="/hr/profile/edit-logo" method="POST" enctype="multipart/form-data">
+        <div class="text-center mb-3">
+          <img id="logoPreview" th:if="${company != null and company.logo != null}" class="logo-preview" th:src="'/uploads/company-logos/' + ${company.logo}">
+          <img id="logoPreview" th:unless="${company != null and company.logo != null}" class="logo-preview" src="https://ui-avatars.com/api/?name=C&background=7c3aed&color=fff&size=80" style="display:none;">
+        </div>
+        <input type="hidden" name="galleryLogo" id="galleryLogo" value="">
+        <div class="d-flex gap-2 justify-content-center mb-2">
+          <input type="file" name="logoFile" id="logoFile" class="form-control" accept="image/*" style="max-width:200px;border-radius:10px;font-size:13px;">
+          <button type="button" class="btn btn-outline-primary rounded-pill px-3" onclick="openLogoPicker()"><i class="bi bi-images me-1"></i>Browse Gallery</button>
+        </div>
+        <p style="font-size:12px;color:#94a3b8;text-align:center;margin-top:12px;">Upload a new logo or select from the gallery.</p>
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-check-lg me-1"></i>Save Logo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<div class="modal fade" id="logoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:14px;border:none;">
+      <div class="modal-header" style="border-bottom:1px solid #e2e8f0;padding:16px 20px;">
+        <h6 style="font-weight:600;margin:0;"><i class="bi bi-images me-2" style="color:#7c3aed;"></i>Select Company Logo</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-3" id="logoPickerBody" style="min-height:200px;">
+        <div class="text-center py-4"><div class="spinner-border text-primary" style="width:2rem;height:2rem;"></div><p class="mt-2" style="color:#64748b;font-size:13px;">Loading logos...</p></div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #e2e8f0;padding:12px 20px;">
+        <small style="color:#94a3b8;">Click a logo to select it</small>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+var logoModal = new bootstrap.Modal(document.getElementById('logoModal'));
+
+function openLogoPicker() {
+  var body = document.getElementById('logoPickerBody');
+  body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" style="width:2rem;height:2rem;"></div><p class="mt-2" style="color:#64748b;font-size:13px;">Loading logos...</p></div>';
+  logoModal.show();
+  fetch('/api/gallery/list?dir=company-logos')
+    .then(function(r){ return r.json(); })
+    .then(function(files){
+      if (!files || files.length === 0) {
+        body.innerHTML = '<div class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-folder-open" style="font-size:36px;display:block;margin-bottom:8px;"></i><p style="font-size:13px;">No logos uploaded yet.</p><small>Go to Company Registration to upload one.</small></div>';
+        return;
+      }
+      var html = '<div class="picker-grid">';
+      files.forEach(function(f){
+        var imgHtml = f.image ? '<img src="/uploads/company-logos/' + f.name + '">' : '<div class="fi"><i class="bi bi-file-earmark"></i></div>';
+        html += '<div class="picker-item" onclick="selectLogo(\'' + f.name.replace(/'/g,"\\'") + '\',this)">' + imgHtml + '<div class="pn">' + f.name + '</div></div>';
+      });
+      html += '</div>';
+      body.innerHTML = html;
+    })
+    .catch(function(){
+      body.innerHTML = '<div class="text-center py-5" style="color:#dc2626;"><i class="bi bi-exclamation-triangle" style="font-size:36px;display:block;margin-bottom:8px;"></i><p style="font-size:13px;">Failed to load gallery.</p></div>';
+    });
+}
+
+function selectLogo(fileName, el) {
+  document.querySelectorAll('.picker-item').forEach(function(i){ i.classList.remove('selected'); });
+  el.classList.add('selected');
+  document.getElementById('galleryLogo').value = fileName;
+  var img = document.getElementById('logoPreview');
+  img.src = '/uploads/company-logos/' + fileName;
+  img.style.display = 'inline-block';
+  setTimeout(function(){ logoModal.hide(); }, 300);
+}
+</script>
+</div>
+
+<script>
+  function togglePwd() {
+    var pwd = document.getElementById('newPassword');
+    var icon = document.getElementById('pwdIcon');
+    pwd.type = pwd.type === 'password' ? 'text' : 'password';
+    icon.innerHTML = pwd.type === 'password' ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+  }
+</script>
+</body>
+</html>

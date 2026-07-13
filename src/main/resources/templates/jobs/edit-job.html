@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain HR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; padding: 30px; }
+    .card { border: none; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .card-header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; font-weight: 600; font-size: 16px; border-radius: 14px 14px 0 0 !important; }
+    .form-label { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 14px; padding: 10px 14px; }
+    .form-control:focus, .form-select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+    .btn-primary { background: linear-gradient(135deg,#4f46e5,#7c3aed); border: none; border-radius: 10px; padding: 10px 24px; font-weight: 600; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,70,229,0.35); }
+  </style>
+</head>
+<body>
+  <div class="container" style="max-width:750px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-weight:700;color:#0f172a;margin:0;"><i class="bi bi-pencil me-2" style="color:#4f46e5;"></i>Edit Job</h4>
+      <a href="/admin/jobs" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i>Back</a>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="bi bi-briefcase me-2"></i>Job Details</div>
+      <div class="card-body p-4">
+        <form th:action="'/job/edit/' + ${job.id}" method="POST">
+          <div class="row g-3 mb-3">
+            <div class="col-md-8">
+              <label class="form-label">Job Title <span style="color:#dc2626;">*</span></label>
+              <input type="text" name="title" class="form-control" th:value="${job.title}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Type <span style="color:#dc2626;">*</span></label>
+              <select name="type" class="form-select" required>
+                <option value="full-time" th:selected="${job.type == 'full-time'}">Full-time</option>
+                <option value="part-time" th:selected="${job.type == 'part-time'}">Part-time</option>
+                <option value="internship" th:selected="${job.type == 'internship'}">Internship</option>
+                <option value="contract" th:selected="${job.type == 'contract'}">Contract</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description <span style="color:#dc2626;">*</span></label>
+            <textarea name="description" class="form-control" rows="5" required th:text="${job.description}"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Requirements</label>
+            <textarea name="requirements" class="form-control" rows="4" th:text="${job.requirements}"></textarea>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Salary (NPR)</label>
+              <input type="text" name="salary" class="form-control" th:value="${job.salary}" placeholder="e.g. Rs. 50,000 - 70,000">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Location</label>
+              <input type="text" name="location" class="form-control" th:value="${job.location}" placeholder="e.g. New York, NY">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Deadline</label>
+              <input type="date" name="deadline" class="form-control" th:value="${job.deadline}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Contact Email</label>
+            <input type="email" name="contactEmail" class="form-control" th:value="${job.contactEmail}">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg me-1"></i>Update Job</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

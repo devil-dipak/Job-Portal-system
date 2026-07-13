@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: "Segoe UI", system-ui, sans-serif; }
+    .sidebar { position:fixed; left:0; top:0; bottom:0; width:250px; background:linear-gradient(180deg,#0f172a,#1e293b); padding:0; z-index:100; overflow-y:auto; }
+    .sidebar-brand { padding:20px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .sidebar-brand h3 { color:#fff; font-size:18px; font-weight:700; letter-spacing:-0.5px; margin:0; }
+    .sidebar-brand small { color:#94a3b8; font-size:11px; }
+    .sidebar-nav { padding:12px 0; }
+    .sidebar-nav a { display:flex; align-items:center; gap:12px; padding:11px 20px; color:#cbd5e1; text-decoration:none; font-size:14px; font-weight:500; transition:all 0.2s; border-left:3px solid transparent; }
+    .sidebar-nav a:hover, .sidebar-nav a.active { background:rgba(255,255,255,0.06); color:#fff; border-left-color:#4f46e5; }
+    .sidebar-nav a i { font-size:18px; width:22px; text-align:center; }
+    .sidebar-nav .section-label { padding:16px 20px 6px; font-size:11px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:1px; }
+    .main-content { margin-left:250px; min-height:100vh; }
+    .topbar { background:#fff; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e2e8f0; position:sticky; top:0; z-index:99; }
+    .content { padding:28px 32px; }
+    .stat-card { background:#fff; border-radius:14px; padding:22px 24px; border:1px solid #e2e8f0; }
+    .stat-card .stat-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:14px; }
+    .stat-card .stat-number { font-size:28px; font-weight:700; color:#0f172a; }
+    .stat-card .stat-label { font-size:13px; color:#64748b; margin-top:2px; }
+    .card { border:none; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .card-header { background:#fff; border-bottom:1px solid #e2e8f0; padding:16px 20px; font-weight:600; font-size:15px; border-radius:14px 14px 0 0 !important; }
+    .activity-item { display:flex; align-items:center; gap:14px; padding:14px 20px; border-bottom:1px solid #f1f5f9; font-size:14px; }
+    .activity-item:last-child { border-bottom:none; }
+    .activity-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .pending-badge { background:#fef3c7; color:#d97706; font-size:11px; padding:2px 10px; border-radius:20px; font-weight:600; }
+    .badge-open { background:#dcfce7; color:#15803d; font-size:11px; padding:2px 10px; border-radius:20px; font-weight:600; }
+    .badge-closed { background:#fef2f2; color:#dc2626; font-size:11px; padding:2px 10px; border-radius:20px; font-weight:600; }
+    .badge-sm { font-size:11px; padding:2px 10px; border-radius:20px; font-weight:600; }
+    @media(max-width:768px) {
+      .sidebar { width:60px; }
+      .sidebar-brand h3, .sidebar-brand small, .sidebar-nav a span, .sidebar-nav .section-label { display:none; }
+      .sidebar-nav a { justify-content:center; padding:14px; border-left:none; }
+      .main-content { margin-left:60px; }
+      .content { padding:20px 16px; }
+      .topbar { padding:12px 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="d-flex align-items-center gap-2">
+      <img src="/logo.svg" style="width:28px;height:28px;">
+      <div>
+        <h3>CertChain</h3>
+        <small><span style="font-size:9px;background:#4f46e5;color:#fff;padding:1px 8px;border-radius:8px;">ADMIN</span></small>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="section-label">Main</div>
+    <a href="/home"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+    <a href="/admin/activities" class="active"><i class="bi bi-activity"></i><span>Activities</span></a>
+    <div class="section-label">Certificates</div>
+    <a href="/certificate/add"><i class="bi bi-file-earmark-plus"></i><span>Issue Certificate</span></a>
+    <a href="/certificate/list"><i class="bi bi-files"></i><span>All Certificates</span></a>
+    <div class="section-label">Blockchain</div>
+    <a href="/block/explorer"><i class="bi bi-link-45deg"></i><span>Blockchain Explorer</span></a>
+    <div class="section-label">Management</div>
+    <a href="/admin/students"><i class="bi bi-mortarboard"></i><span>Students</span></a>
+    <a href="/admin/companies"><i class="bi bi-building"></i><span>Companies</span></a>
+    <a href="/admin/jobs"><i class="bi bi-briefcase"></i><span>Jobs</span></a>
+    <a href="/admin/applications"><i class="bi bi-send"></i><span>Applications</span></a>
+    <a href="/department/list"><i class="bi bi-building"></i><span>Departments</span></a>
+    <a href="/admin/gallery"><i class="bi bi-images"></i><span>Gallery</span></a>
+    <div class="section-label">Account</div>
+    <a href="/profile"><i class="bi bi-person"></i><span>Profile</span></a>
+    <a href="/logout"><i class="bi bi-box-arrow-left"></i><span>Logout</span></a>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <h4 style="font-size:18px;font-weight:600;color:#0f172a;margin:0;"><i class="bi bi-activity me-2" style="color:#4f46e5;"></i>System Activities</h4>
+    <div><span style="font-size:13px;color:#64748b;">Live overview of all platform activity</span></div>
+  </div>
+
+  <div class="content">
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <a href="/admin/users" style="text-decoration:none;display:block;">
+          <div class="stat-card" style="cursor:pointer;transition:all 0.2s;">
+            <div class="stat-icon" style="background:#eef2ff;color:#4f46e5;"><i class="bi bi-people"></i></div>
+            <div class="stat-number" th:text="${totalUsers}">0</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <a href="/company/list" style="text-decoration:none;display:block;">
+          <div class="stat-card" style="cursor:pointer;transition:all 0.2s;">
+            <div class="stat-icon" style="background:#f0fdf4;color:#15803d;"><i class="bi bi-building"></i></div>
+            <div class="stat-number" th:text="${totalCompanies}">0</div>
+            <div class="stat-label">Companies</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <a href="/admin/jobs" style="text-decoration:none;display:block;">
+          <div class="stat-card" style="cursor:pointer;transition:all 0.2s;">
+            <div class="stat-icon" style="background:#fef2f2;color:#dc2626;"><i class="bi bi-briefcase"></i></div>
+            <div class="stat-number" th:text="${totalJobs}">0</div>
+            <div class="stat-label">Jobs Posted</div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3 col-6">
+        <a href="/admin/applications" style="text-decoration:none;display:block;">
+          <div class="stat-card" style="cursor:pointer;transition:all 0.2s;">
+            <div class="stat-icon" style="background:#f5f3ff;color:#7c3aed;"><i class="bi bi-send"></i></div>
+            <div class="stat-number" th:text="${totalApplications}">0</div>
+            <div class="stat-label">Applications</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-hourglass-split me-2" style="color:#d97706;"></i>Pending Company Approvals</div>
+          <div th:if="${#lists.isEmpty(pendingCompanies)}" class="text-center py-4" style="color:#94a3b8;font-size:14px;">No pending approvals.</div>
+          <div th:each="c : ${pendingCompanies}" class="activity-item">
+            <div class="activity-icon" style="background:#fef3c7;color:#d97706;"><i class="bi bi-building"></i></div>
+            <div style="flex:1;">
+              <a th:href="'/company/list'" style="text-decoration:none;color:inherit;">
+                <strong style="color:#0f172a;" th:text="${c.name}">Company</strong>
+              </a>
+              <div style="font-size:12px;color:#64748b;" th:text="'Registered by HR #' + ${c.hrUserId}">info</div>
+            </div>
+            <div class="d-flex gap-1">
+              <a th:href="'/company/approve?id=' + ${c.id}" class="btn btn-success btn-sm" style="border-radius:8px;font-size:11px;padding:3px 10px;"><i class="bi bi-check"></i></a>
+              <a th:href="'/company/reject?id=' + ${c.id}" class="btn btn-danger btn-sm" style="border-radius:8px;font-size:11px;padding:3px 10px;"><i class="bi bi-x"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <a href="/admin/jobs" style="text-decoration:none;color:inherit;display:block;"><div class="card-header"><i class="bi bi-briefcase me-2" style="color:#4f46e5;"></i>Recent Job Postings <i class="bi bi-arrow-right" style="font-size:12px;color:#94a3b8;float:right;line-height:24px;"></i></div></a>
+          <div th:if="${#lists.isEmpty(jobs)}" class="text-center py-4" style="color:#94a3b8;font-size:14px;">No jobs posted yet.</div>
+          <div th:each="job : ${jobs}" class="activity-item">
+            <div class="activity-icon" style="background:#eef2ff;color:#4f46e5;"><i class="bi bi-briefcase"></i></div>
+            <div style="flex:1;">
+              <a th:href="'/jobs/' + ${job.id}" style="text-decoration:none;color:inherit;">
+                <strong style="color:#0f172a;" th:text="${job.title}">Job Title</strong>
+              </a>
+              <div style="font-size:12px;color:#64748b;">
+                <span th:text="${job.type}">type</span>
+                <span th:if="${job.createdAt}"> &middot; <span th:text="${job.createdAt}">date</span></span>
+              </div>
+            </div>
+            <span class="badge-open" th:if="${job.status == 'open'}" th:text="${job.status}">open</span>
+            <span class="badge-closed" th:if="${job.status == 'closed'}" th:text="${job.status}">closed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-building me-2" style="color:#64748b;"></i>All Registered Companies</div>
+          <div th:if="${#lists.isEmpty(companies)}" class="text-center py-4" style="color:#94a3b8;font-size:14px;">No companies yet.</div>
+          <table class="table table-hover mb-0" th:if="${not #lists.isEmpty(companies)}">
+            <thead>
+              <tr>
+                <th style="padding-left:20px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0;">Company</th>
+                <th style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0;">Status</th>
+                <th style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0;">Date</th>
+                <th style="padding-right:20px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e2e8f0;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="c : ${companies}">
+                <td style="padding-left:20px;vertical-align:middle;">
+                  <a th:href="'/company/list'" style="text-decoration:none;">
+                    <strong style="font-size:14px;color:#0f172a;" th:text="${c.name}">Name</strong>
+                  </a>
+                  <div style="font-size:12px;color:#64748b;" th:text="${c.email}">email</div>
+                </td>
+                <td style="vertical-align:middle;">
+                  <span class="pending-badge" th:if="${c.status == 'pending'}">pending</span>
+                  <span class="badge-open" th:if="${c.status == 'approved'}">approved</span>
+                  <span class="badge-closed" th:if="${c.status == 'rejected'}">rejected</span>
+                  <span class="badge-sm" style="background:#f1f5f9;color:#64748b;" th:if="${c.status == null}">unreviewed</span>
+                </td>
+                <td style="vertical-align:middle;font-size:13px;color:#64748b;" th:text="${c.id}">-</td>
+                <td style="padding-right:20px;vertical-align:middle;">
+                  <a th:href="'/company/approve?id=' + ${c.id}" class="btn btn-success btn-sm" th:if="${c.status == null or c.status == 'pending' or c.status == 'rejected'}" style="border-radius:8px;font-size:11px;padding:3px 10px;"><i class="bi bi-check-circle"></i></a>
+                  <a th:href="'/company/reject?id=' + ${c.id}" class="btn btn-danger btn-sm" th:if="${c.status == null or c.status == 'pending'}" style="border-radius:8px;font-size:11px;padding:3px 10px;"><i class="bi bi-x-circle"></i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

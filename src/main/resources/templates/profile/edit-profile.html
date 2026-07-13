@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain Student</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; padding: 30px; }
+    .card { border: none; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .card-header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; font-weight: 600; font-size: 16px; border-radius: 14px 14px 0 0 !important; }
+    .form-label { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .form-control { border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 14px; padding: 10px 14px; }
+    .form-control:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+    .btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; border-radius: 10px; padding: 10px 24px; font-weight: 600; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,70,229,0.35); }
+    .profile-pic-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #e2e8f0; }
+    .picker-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; max-height:400px; overflow-y:auto; }
+    .picker-item { border:2px solid #e2e8f0; border-radius:8px; overflow:hidden; cursor:pointer; text-align:center; padding:6px; transition:all .15s; }
+    .picker-item:hover { border-color:#4f46e5; background:#eef2ff; }
+    .picker-item img { width:100%; height:70px; object-fit:cover; border-radius:4px; }
+    .picker-item .fi { font-size:28px; color:#94a3b8; padding:10px 0; }
+    .picker-item .pn { font-size:11px; color:#334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .picker-item.selected { border-color:#4f46e5; background:#eef2ff; }
+  </style>
+</head>
+<body>
+  <div class="container" style="max-width:700px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h4 style="font-weight:700;color:#0f172a;margin:0;"><i class="bi bi-pencil me-2" style="color:#4f46e5;"></i>Edit Profile</h4>
+      <a href="/student/profile" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="bi bi-arrow-left me-1"></i>Back to Profile</a>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person me-2"></i>Profile Information</div>
+      <div class="card-body p-4">
+        <div th:if="${message}" class="alert alert-danger" th:text="${message}"></div>
+
+        <form action="/student/profile/edit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="id" th:value="${profile.id}">
+          <input type="hidden" name="galleryPicture" id="galleryPicture" value="">
+
+          <div class="mb-4 text-center">
+            <div th:if="${profile.profilePicture}">
+              <img class="profile-pic-preview" id="picPreview" th:src="'/uploads/profile-pictures/' + ${profile.profilePicture}">
+            </div>
+            <div th:unless="${profile.profilePicture}">
+              <img class="profile-pic-preview" id="picPreview" src="https://ui-avatars.com/api/?name=U&background=4f46e5&color=fff&size=100" style="display:none;">
+            </div>
+            <div class="mt-2">
+              <label class="form-label">Profile Picture</label>
+              <div class="d-flex gap-2">
+                <input type="file" name="pictureFile" id="pictureFile" class="form-control" accept="image/*" style="flex:1;">
+                <button type="button" class="btn btn-outline-primary" style="border-radius:10px;white-space:nowrap;font-size:13px;" onclick="openPicker('profile-pictures','galleryPicture','picPreview')"><i class="bi bi-images me-1"></i>Gallery</button>
+              </div>
+              <small style="color:#94a3b8;font-size:11px;">Upload a new file or select from the gallery</small>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Phone</label>
+              <input type="text" name="phone" class="form-control" th:value="${profile.phone}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Address</label>
+              <input type="text" name="address" class="form-control" th:value="${profile.address}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Education</label>
+            <textarea name="education" class="form-control" rows="4" placeholder="Your educational background (degree, institution, year, etc.)" th:text="${profile.education}"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Skills</label>
+            <textarea name="skills" class="form-control" rows="3" placeholder="e.g. Java, Python, Blockchain, SQL (comma separated)" th:text="${profile.skills}"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Resume (PDF)</label>
+            <input type="hidden" name="galleryResume" id="galleryResume" value="">
+            <div class="d-flex gap-2">
+              <input type="file" name="resumeFile" id="resumeFile" class="form-control" accept=".pdf" style="flex:1;">
+              <button type="button" class="btn btn-outline-primary" style="border-radius:10px;white-space:nowrap;font-size:13px;" onclick="openPicker('resumes','galleryResume',null)"><i class="bi bi-images me-1"></i>Gallery</button>
+            </div>
+            <div th:if="${profile.resumePath}" class="mt-1" style="font-size:13px;">
+              <a th:href="'/uploads/resumes/' + ${profile.resumePath}" target="_blank"><i class="bi bi-file-pdf me-1"></i>Current Resume</a>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Certificate File</label>
+            <input type="hidden" name="galleryCertificate" id="galleryCertificate" value="">
+            <div class="d-flex gap-2">
+              <input type="file" name="certificateFile" id="certificateFile" class="form-control" accept=".pdf,image/*" style="flex:1;">
+              <button type="button" class="btn btn-outline-primary" style="border-radius:10px;white-space:nowrap;font-size:13px;" onclick="openPicker('certificates','galleryCertificate',null)"><i class="bi bi-images me-1"></i>Gallery</button>
+            </div>
+            <div th:if="${profile.certificateFile}" class="mt-1" style="font-size:13px;">
+              <a th:href="'/uploads/certificates/' + ${profile.certificateFile}" target="_blank"><i class="bi bi-file-earmark me-1"></i>View Certificate</a>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Other Document</label>
+            <input type="hidden" name="galleryExtraDoc" id="galleryExtraDoc" value="">
+            <div class="d-flex gap-2">
+              <input type="file" name="extraDocFile" id="extraDocFile" class="form-control" style="flex:1;">
+              <button type="button" class="btn btn-outline-primary" style="border-radius:10px;white-space:nowrap;font-size:13px;" onclick="openPicker('extra-docs','galleryExtraDoc',null)"><i class="bi bi-images me-1"></i>Gallery</button>
+            </div>
+            <div th:if="${profile.extraDocFile}" class="mt-1" style="font-size:13px;">
+              <a th:href="'/uploads/extra-docs/' + ${profile.extraDocFile}" target="_blank"><i class="bi bi-file-earmark me-1"></i>View Document</a>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg me-1"></i>Save Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="galleryModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:14px;border:none;">
+      <div class="modal-header" style="border-bottom:1px solid #e2e8f0;padding:16px 20px;">
+        <h6 style="font-weight:600;margin:0;"><i class="bi bi-images me-2" style="color:#4f46e5;"></i>Select from Gallery</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-3" id="pickerBody" style="min-height:200px;">
+        <div class="text-center py-4" id="pickerLoading"><div class="spinner-border text-primary" style="width:2rem;height:2rem;"></div><p class="mt-2" style="color:#64748b;font-size:13px;">Loading files...</p></div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #e2e8f0;padding:12px 20px;">
+        <small style="color:#94a3b8;">Click a file to select it</small>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+var modal = new bootstrap.Modal(document.getElementById('galleryModal'));
+
+function openPicker(dir, inputId, previewId) {
+  var body = document.getElementById('pickerBody');
+  body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" style="width:2rem;height:2rem;"></div><p class="mt-2" style="color:#64748b;font-size:13px;">Loading files...</p></div>';
+  modal.show();
+  fetch('/api/gallery/list?dir=' + dir)
+    .then(function(r){ return r.json(); })
+    .then(function(files){
+      if (!files || files.length === 0) {
+        body.innerHTML = '<div class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-folder-open" style="font-size:36px;display:block;margin-bottom:8px;"></i><p style="font-size:13px;">No files in this gallery yet.</p><small>Upload files via the Gallery.</small></div>';
+        return;
+      }
+      var html = '<div class="picker-grid">';
+      files.forEach(function(f){
+        var imgHtml = f.image ? '<img src="/uploads/' + dir + '/' + f.name + '" onerror="this.outerHTML=\'<div class=\\\'fi\\\'><i class=\\\'bi bi-image\\\'></i></div>\'">' : '<div class="fi"><i class="bi bi-file-earmark-pdf"></i></div>';
+        html += '<div class="picker-item" onclick="selectGalleryFile(\'' + inputId + '\',\'' + previewId + '\',\'' + dir + '\',\'' + f.name.replace(/'/g,"\\'") + '\',this)">' + imgHtml + '<div class="pn">' + f.name + '</div></div>';
+      });
+      html += '</div>';
+      body.innerHTML = html;
+    })
+    .catch(function(){
+      body.innerHTML = '<div class="text-center py-5" style="color:#dc2626;"><i class="bi bi-exclamation-triangle" style="font-size:36px;display:block;margin-bottom:8px;"></i><p style="font-size:13px;">Failed to load gallery.</p></div>';
+    });
+}
+
+function selectGalleryFile(inputId, previewId, dir, fileName, el) {
+  document.getElementById(inputId).value = fileName;
+  document.querySelectorAll('.picker-item').forEach(function(i){ i.classList.remove('selected'); });
+  el.classList.add('selected');
+  if (previewId) {
+    var img = document.getElementById(previewId);
+    img.src = '/uploads/' + dir + '/' + fileName;
+    img.style.display = 'inline-block';
+  }
+  setTimeout(function(){ modal.hide(); }, 300);
+}
+</script>
+</body>
+</html>

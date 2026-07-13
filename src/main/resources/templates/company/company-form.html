@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; }
+    .card { border: none; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .card-header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; font-weight: 600; font-size: 16px; border-radius: 14px 14px 0 0 !important; }
+    .form-label { font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .form-control, .form-select { border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 14px; padding: 10px 14px; }
+    .form-control:focus, .form-select:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+    .btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; border-radius: 10px; padding: 10px 24px; font-weight: 600; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,70,229,0.35); }
+    .logo-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid #e2e8f0; }
+  </style>
+</head>
+<body>
+  <div class="container py-5" style="max-width:700px;">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-building me-2"></i>
+        <span th:if="${company.id != null}">Edit Company</span>
+        <span th:unless="${company.id != null}">Register Your Company</span>
+      </div>
+      <div class="card-body p-4">
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+        <form action="/company/register" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="id" th:value="${company.id}">
+
+          <div class="mb-3">
+            <label class="form-label">Company Name</label>
+            <input type="text" name="name" class="form-control" th:value="${company.name}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3" th:text="${company.description}"></textarea>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Address</label>
+              <input type="text" name="address" class="form-control" th:value="${company.address}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Website</label>
+              <input type="url" name="website" class="form-control" th:value="${company.website}">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Phone</label>
+              <input type="text" name="phone" class="form-control" th:value="${company.phone}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" th:value="${company.email}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Company Logo</label>
+            <input type="file" name="logoFile" class="form-control" accept="image/*">
+            <div th:if="${company.logo}" class="mt-2">
+              <img class="logo-preview" th:src="'/uploads/company-logos/' + ${company.logo}">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-check-lg me-1"></i>
+            <span th:if="${company.id != null}">Update Company</span>
+            <span th:unless="${company.id != null}">Register Company</span>
+          </button>
+        </form>
+
+        <div class="mt-3 text-center">
+          <a href="/" class="text-decoration-none" style="color:#64748b;font-size:14px;"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

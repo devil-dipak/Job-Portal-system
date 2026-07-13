@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain HR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#f1f5f9; font-family:'Segoe UI',system-ui,sans-serif; padding:30px; }
+    .card { border:none; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .profile-pic { width:80px; height:80px; border-radius:50%; object-fit:cover; }
+    .cert-card { background:#f8fafc; border-radius:12px; padding:14px 18px; border:1px solid #e2e8f0; }
+    .verified-badge { background:#dcfce7; color:#15803d; font-size:11px; padding:2px 10px; border-radius:20px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+    .timeline { position:relative; padding-left:28px; }
+    .timeline::before { content:''; position:absolute; left:8px; top:8px; bottom:8px; width:2px; background:#e2e8f0; }
+    .timeline-item { position:relative; padding:0 0 16px 16px; }
+    .timeline-item:last-child { padding-bottom:0; }
+    .timeline-dot { position:absolute; left:-24px; top:4px; width:14px; height:14px; border-radius:50%; border:2px solid #4f46e5; background:#fff; }
+    .score-ring { width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; }
+    .interview-badge { background:#f5f3ff; color:#7c3aed; padding:8px 14px; border-radius:10px; border:1px solid #ede9fe; }
+  </style>
+</head>
+<body>
+<div class="container" style="max-width:1000px;">
+  <a th:href="'/job/applicants?jobId=' + ${application.jobId}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-4"><i class="bi bi-arrow-left me-1"></i>Back to Applicants</a>
+
+  <div class="row g-4">
+    <!-- LEFT COLUMN: Profile + Status -->
+    <div class="col-md-4">
+      <div class="card p-4 text-center">
+        <div class="mx-auto position-relative">
+          <img th:if="${profile != null and profile.profilePicture}" class="profile-pic" th:src="'/uploads/profile-pictures/' + ${profile.profilePicture}">
+          <div th:unless="${profile != null and profile.profilePicture}" class="profile-pic d-inline-flex align-items-center justify-content-center mx-auto" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-size:28px;font-weight:700;">
+            <span th:text="${#strings.substring(application.studentName,0,1) ?: 'S'}">S</span>
+          </div>
+        </div>
+        <h5 style="font-weight:600;color:#0f172a;margin:12px 0 0;" th:text="${application.studentName}">Student</h5>
+        <div style="font-size:13px;color:#64748b;margin:4px 0;">
+          <div th:if="${profile != null and profile.phone}"><i class="bi bi-phone me-1"></i><span th:text="${profile.phone}">Phone</span></div>
+          <div th:if="${profile != null and profile.address}"><i class="bi bi-geo-alt me-1"></i><span th:text="${profile.address}">Address</span></div>
+        </div>
+
+        <!-- Match Score -->
+        <div th:if="${application.matchScore > 0}" class="mt-2">
+          <div style="font-size:11px;color:#64748b;font-weight:600;">SKILL MATCH</div>
+          <div class="score-ring mx-auto" th:classappend="${application.matchScore >= 70} ? 'bg-success text-white' : (${application.matchScore >= 40} ? 'bg-warning text-dark' : 'bg-danger text-white')" th:text="${application.matchScore + '%'}">0%</div>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="mt-2">
+          <span th:if="${application.status == 'pending'}" class="badge" style="background:#fef3c7;color:#d97706;font-size:12px;padding:4px 16px;border-radius:20px;">Pending</span>
+          <span th:if="${application.status == 'shortlisted'}" class="badge" style="background:#eef2ff;color:#4f46e5;font-size:12px;padding:4px 16px;border-radius:20px;">Shortlisted</span>
+          <span th:if="${application.status == 'interview'}" class="badge" style="background:#f5f3ff;color:#7c3aed;font-size:12px;padding:4px 16px;border-radius:20px;">Interview</span>
+          <span th:if="${application.status == 'accepted'}" class="badge" style="background:#dcfce7;color:#15803d;font-size:12px;padding:4px 16px;border-radius:20px;">Accepted</span>
+          <span th:if="${application.status == 'rejected'}" class="badge" style="background:#fef2f2;color:#dc2626;font-size:12px;padding:4px 16px;border-radius:20px;">Rejected</span>
+        </div>
+
+        <hr>
+        <!-- Actions -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <form method="POST" th:action="'/job/application/update?id=' + ${application.id}" style="display:block;width:100%;margin:0;">
+            <input type="hidden" name="status" value="shortlisted">
+            <button type="submit" class="btn btn-primary btn-sm w-100" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:8px;font-size:12px;padding:6px 12px;"><i class="bi bi-star me-1"></i>Shortlist</button>
+          </form>
+          <a th:if="${job != null and interview == null}" th:href="'/job/schedule-interview?applicationId=' + ${application.id} + '&jobId=' + ${job.id}" class="btn btn-outline-info btn-sm w-100" style="border-radius:8px;font-size:12px;padding:6px 12px;"><i class="bi bi-calendar-plus me-1"></i>Schedule Interview</a>
+          <div th:if="${interview != null}" class="interview-badge text-start" style="font-size:12px;">
+            <strong><i class="bi bi-calendar-check me-1"></i>Interview:</strong>
+            <span th:text="${interview.scheduledAt}">Date</span>
+            <a th:if="${interview.meetingLink}" th:href="${interview.meetingLink}" target="_blank" class="d-block mt-1" style="color:#4f46e5;font-weight:600;"><i class="bi bi-camera-video me-1"></i>Join Meeting</a>
+          </div>
+          <form method="POST" th:action="'/job/application/update?id=' + ${application.id}" style="display:block;width:100%;margin:0;">
+            <input type="hidden" name="status" value="accepted">
+            <button type="submit" class="btn btn-success btn-sm w-100" style="border-radius:8px;font-size:12px;padding:6px 12px;"><i class="bi bi-check-circle me-1"></i>Accept</button>
+          </form>
+          <form method="POST" th:action="'/job/application/update?id=' + ${application.id}" style="display:block;width:100%;margin:0;">
+            <input type="hidden" name="status" value="rejected">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100" style="border-radius:8px;font-size:12px;padding:6px 12px;"><i class="bi bi-x-circle me-1"></i>Reject</button>
+          </form>
+        </div>
+
+        <!-- Status Update with Remark -->
+        <hr>
+        <form th:action="'/job/application/update?id=' + ${application.id}" method="POST" style="text-align:left;">
+          <div class="mb-2">
+            <label style="font-size:11px;font-weight:600;color:#64748b;">Update Status</label>
+            <select name="status" class="form-select form-select-sm" style="border-radius:8px;font-size:12px;">
+              <option value="shortlisted">Shortlist</option>
+              <option value="accepted">Accept</option>
+              <option value="rejected">Reject</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <textarea name="remark" class="form-control form-control-sm" rows="2" placeholder="Add a remark..." style="border-radius:8px;font-size:12px;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-dark btn-sm w-100" style="border-radius:8px;font-size:12px;padding:6px;"><i class="bi bi-arrow-right me-1"></i>Update</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Details + Certs + Timeline -->
+    <div class="col-md-8">
+      <!-- Profile Info -->
+      <div class="card p-4 mb-3">
+        <h6 style="font-weight:600;color:#0f172a;margin-bottom:10px;"><i class="bi bi-person me-1" style="color:#4f46e5;"></i>Profile & Skills</h6>
+        <div class="row g-2" style="font-size:14px;">
+          <div class="col-6" th:if="${profile != null and profile.phone}"><strong style="color:#64748b;font-size:12px;">Phone:</strong><br><span th:text="${profile.phone}">-</span></div>
+          <div class="col-6" th:if="${profile != null and profile.address}"><strong style="color:#64748b;font-size:12px;">Address:</strong><br><span th:text="${profile.address}">-</span></div>
+        </div>
+        <div th:if="${profile != null and profile.education}" class="mt-2">
+          <strong style="color:#64748b;font-size:12px;">Education:</strong>
+          <p style="font-size:14px;color:#334155;white-space:pre-wrap;margin:4px 0 0;" th:text="${profile.education}">-</p>
+        </div>
+        <div th:if="${profile != null and profile.skills}" class="mt-2">
+          <strong style="color:#64748b;font-size:12px;">Skills:</strong>
+          <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">
+            <span th:each="s : ${#strings.listSplit(profile.skills, ',')}" class="badge" style="background:#eef2ff;color:#4f46e5;font-size:11px;font-weight:500;padding:4px 10px;" th:text="${#strings.trim(s)}">Skill</span>
+          </div>
+        </div>
+        <div th:if="${application.cvPath}" class="mt-2">
+          <a th:href="'/uploads/cvs/' + ${application.cvPath}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill" style="font-size:12px;"><i class="bi bi-file-pdf me-1"></i>View CV</a>
+        </div>
+        <div th:if="${application.extraDocPath}" class="mt-2">
+          <a th:href="'/uploads/extra-docs/' + ${application.extraDocPath}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size:12px;"><i class="bi bi-paperclip me-1"></i>View Extra Document</a>
+        </div>
+        <div th:if="${profile != null and profile.resumePath}" class="mt-2">
+          <a th:href="'/uploads/resumes/' + ${profile.resumePath}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill" style="font-size:12px;"><i class="bi bi-file-pdf me-1"></i>View Resume</a>
+        </div>
+        <div th:if="${profile != null and profile.certificateFile}" class="mt-2">
+          <a th:href="'/uploads/certificates/' + ${profile.certificateFile}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill" style="font-size:12px;"><i class="bi bi-file-earmark me-1"></i>View Certificate File</a>
+        </div>
+        <div th:if="${profile != null and profile.extraDocFile}" class="mt-2">
+          <a th:href="'/uploads/extra-docs/' + ${profile.extraDocFile}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill" style="font-size:12px;"><i class="bi bi-paperclip me-1"></i>View Profile Document</a>
+        </div>
+      </div>
+
+      <!-- Cover Note -->
+      <div class="card p-4 mb-3" th:if="${application.coverNote}">
+        <h6 style="font-weight:600;color:#0f172a;margin-bottom:8px;"><i class="bi bi-chat me-1" style="color:#4f46e5;"></i>Cover Note</h6>
+        <p style="font-size:14px;color:#475569;white-space:pre-wrap;margin:0;" th:text="${application.coverNote}">Cover note</p>
+      </div>
+
+      <!-- Blockchain-Verified Certificates -->
+      <div class="card p-4 mb-3">
+        <h6 style="font-weight:600;color:#0f172a;margin-bottom:12px;">
+          <i class="bi bi-patch-check-fill me-1" style="color:#15803d;"></i>Blockchain-Verified Certificates
+          <span style="font-size:12px;font-weight:400;color:#64748b;margin-left:4px;">(<span th:text="${#lists.size(certificates)}">0</span> attached)</span>
+        </h6>
+        <div th:if="${#lists.isEmpty(certificates)}" style="font-size:13px;color:#94a3b8;padding:16px;text-align:center;background:#f8fafc;border-radius:10px;">
+          <i class="bi bi-file-earmark" style="font-size:24px;display:block;margin-bottom:4px;"></i>No certificates attached with this application.
+        </div>
+        <div th:each="cert : ${certificates}" class="cert-card d-flex align-items-center justify-content-between mb-2" th:if="${not #lists.isEmpty(certificates)}">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <h6 style="font-size:14px;font-weight:600;margin:0;" th:text="${cert.courseName}">Course</h6>
+              <span class="verified-badge"><i class="bi bi-shield-check"></i>Blockchain</span>
+            </div>
+            <small style="color:#64748b;">
+              <span th:text="${cert.studentName}">Student</span> &middot; Issued: <span th:text="${cert.issueDate}">Date</span> &middot; <span th:text="${cert.issuer}">Issuer</span>
+            </small>
+            <div style="font-size:10px;color:#94a3b8;font-family:monospace;margin-top:2px;" th:text="${cert.certificateHash}">Hash</div>
+          </div>
+          <a th:href="'/certificate/pdf/' + ${cert.id}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill" style="font-size:11px;"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+        </div>
+      </div>
+
+      <!-- Application Timeline -->
+      <div class="card p-4 mb-3">
+        <h6 style="font-weight:600;color:#0f172a;margin-bottom:12px;">
+          <i class="bi bi-clock-history me-1" style="color:#4f46e5;"></i>Application Timeline
+          <a th:href="'/application/timeline?applicationId=' + ${application.id}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill" style="font-size:11px;margin-left:8px;">View Full</a>
+        </h6>
+        <div class="timeline">
+          <div th:each="entry : ${timeline}" class="timeline-item" th:if="${#lists.size(timeline) <= 5}">
+            <div class="timeline-dot"></div>
+            <div style="font-size:13px;">
+              <strong style="color:#0f172a;" th:text="${entry.status}">Status</strong>
+              <p style="color:#64748b;margin:0;font-size:12px;" th:text="${entry.remark}">Remark</p>
+              <small style="color:#94a3b8;font-size:11px;" th:text="${entry.createdAt}">Date</small>
+            </div>
+          </div>
+          <div th:if="${#lists.isEmpty(timeline)}" style="font-size:13px;color:#94a3b8;">No timeline entries yet.</div>
+        </div>
+      </div>
+
+      <!-- Company Info -->
+      <div class="card p-4" th:if="${company != null}">
+        <h6 style="font-weight:600;color:#0f172a;margin-bottom:8px;"><i class="bi bi-building me-1" style="color:#4f46e5;"></i>Company</h6>
+        <div class="d-flex align-items-center gap-3">
+          <img th:if="${company.logo}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;" th:src="'/uploads/company-logos/' + ${company.logo}">
+          <div th:unless="${company.logo}" style="width:48px;height:48px;border-radius:10px;background:#eef2ff;color:#4f46e5;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;" th:text="${#strings.substring(company.name,0,1)}">C</div>
+          <div>
+            <strong th:text="${company.name}">Company</strong>
+            <div style="font-size:12px;color:#64748b;" th:if="${company.website}"><i class="bi bi-globe"></i> <a th:href="${company.website}" target="_blank" th:text="${company.website}">Website</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

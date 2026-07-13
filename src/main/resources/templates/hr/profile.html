@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CertChain HR</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#f1f5f9; font-family:'Segoe UI',system-ui,sans-serif; padding:30px; }
+    .card { border:none; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+    .profile-pic-lg { width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+<div class="container" style="max-width:900px;">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 style="font-weight:700;color:#0f172a;margin:0;"><i class="bi bi-person me-2" style="color:#7c3aed;"></i>HR Profile</h4>
+    <div class="d-flex gap-2">
+      <a href="/hr/profile/edit" class="btn btn-primary btn-sm rounded-pill px-3" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;"><i class="bi bi-pencil me-1"></i>Edit Profile</a>
+      <a href="/hrHome" class="btn btn-outline-secondary btn-sm rounded-pill px-3"><i class="bi bi-grid me-1"></i>Dashboard</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-5">
+      <div class="card p-4 text-center">
+        <div class="profile-pic-lg d-inline-flex align-items-center justify-content-center mx-auto" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;font-size:36px;font-weight:700;">
+          <span th:text="${#strings.substring(user.fname,0,1).toUpperCase()}">H</span>
+        </div>
+        <h4 style="font-weight:700;color:#0f172a;margin:16px 0 2px;" th:text="${user.fname + ' ' + user.lname}">HR Name</h4>
+        <p style="color:#64748b;font-size:14px;margin:0;" th:text="${user.email}">email</p>
+        <p style="font-size:12px;color:#7c3aed;font-weight:600;margin-top:4px;"><i class="bi bi-building me-1"></i>HR / Recruiter</p>
+        <hr>
+        <div style="font-size:13px;color:#475569;text-align:left;">
+          <div class="mb-2"><i class="bi bi-envelope me-2" style="color:#64748b;"></i><span th:text="${user.email}">email</span></div>
+        </div>
+      </div>
+
+      <div class="card p-4 mt-4" th:if="${company}">
+        <h5 style="font-weight:600;color:#0f172a;margin-bottom:12px;"><i class="bi bi-building me-1" style="color:#7c3aed;"></i>Company</h5>
+        <div style="font-size:13px;color:#475569;">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <img th:if="${company.logo}" th:src="'/uploads/company-logos/' + ${company.logo}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
+            <strong th:text="${company.name}">Company Name</strong>
+          </div>
+          <div th:if="${company.status}" class="mb-2">
+            <span th:if="${company.status == 'approved'}" class="badge" style="background:#dcfce7;color:#15803d;font-size:11px;">Approved</span>
+            <span th:if="${company.status == 'pending'}" class="badge" style="background:#fef3c7;color:#d97706;font-size:11px;">Pending</span>
+            <span th:if="${company.status == 'rejected'}" class="badge" style="background:#fef2f2;color:#dc2626;font-size:11px;">Rejected</span>
+          </div>
+          <div th:if="${company.phone}" class="mb-2"><i class="bi bi-phone me-2"></i><span th:text="${company.phone}"></span></div>
+          <div th:if="${company.website}"><i class="bi bi-globe me-2"></i><a th:href="${company.website}" th:text="${company.website}" target="_blank"></a></div>
+        </div>
+        <a href="/company/register" class="btn btn-outline-primary btn-sm rounded-pill w-100 mt-3"><i class="bi bi-pencil me-1"></i>Edit Company</a>
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <div class="card p-4">
+        <h5 style="font-weight:600;color:#0f172a;margin-bottom:16px;"><i class="bi bi-person-badge me-1"></i>Account Details</h5>
+        <div style="font-size:14px;color:#475569;">
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">First Name</div>
+            <div class="col-sm-8 fw-semibold" th:text="${user.fname}">John</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Last Name</div>
+            <div class="col-sm-8 fw-semibold" th:text="${user.lname}">Doe</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4 text-muted">Email</div>
+            <div class="col-sm-8 fw-semibold" th:text="${user.email}">hr@company.com</div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4 text-muted">Role</div>
+            <div class="col-sm-8"><span style="background:#f5f3ff;color:#7c3aed;font-size:12px;padding:2px 12px;border-radius:20px;font-weight:600;">HR</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 mt-4">
+        <h5 style="font-weight:600;color:#0f172a;margin-bottom:12px;"><i class="bi bi-link-45deg me-1" style="color:#7c3aed;"></i>Quick Links</h5>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="/job/post" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-plus-circle me-1"></i>Post a Job</a>
+          <a href="/my-jobs" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-briefcase me-1"></i>My Jobs</a>
+          <a href="/verify" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-shield-check me-1"></i>Verify Certificate</a>
+          <a href="/company/register" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-building me-1"></i>Company Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
